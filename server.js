@@ -10,9 +10,9 @@ const {
     SERVER_PORT, PROTOCOL, BASE_URL_COORDS, API_KEY, LANG_API, LIMIT_COORDS
 } = process.env
 
-app.route('/obterCoordenadas')
-    .post(async (req, res) => {
-        const { cidade } = req.body;
+app.route('/coords')
+    .get(async (req, res) => {
+        const cidade = req.query.cidade;
 
         if (!cidade) {
             return res.status(400).json({ error: 'O nome da cidade é obrigatório' });
@@ -34,7 +34,6 @@ app.route('/obterCoordenadas')
         }
     })
     .all((req, res) => {
-        // Para qualquer outro método, retorna 405 Method Not Allowed
         res.status(405).send(`
       <h1>405 Method Not Allowed</h1>
       <img src="https://http.cat/405" alt="405 Method Not Allowed">

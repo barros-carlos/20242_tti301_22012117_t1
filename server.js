@@ -52,6 +52,49 @@ app.route('/coords')
         `);
     });
 
+app.route('/weather')
+    .get(async (req, res) => {
+        const lat = req.query.lat;
+        const lon = req.query.lon;
+
+        if (!lat || !lon) {
+            return res.status(400).send(`
+              <h1>400 Bad Request</h1>
+              <p>A Longitude e Latitude são obrigatórias</p>
+              <img src="https://http.cat/400" alt="400 Bad Request">
+            `);
+        }
+
+        try {
+            const url = `${PROTOCOL}://${BASE_URL_WEATHER}?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${WEATHER_UNITS}&lang=${LANG_API}`;
+            const response = await axios.get(url);
+
+            if (response.data.main && response.data.weather && response.data.weather.length > 0) {
+                const feels_like = response.data.main.feels_like;
+                const description = response.data.weather[0].description;
+                return res.json({ Sensação_Térmica: feels_like + " °C", Descrição: description });
+            } else {
+                return res.status(404).send(`
+                  <h1>404 Not Found</h1>
+                  <p>Nenhuma sensação térmica e/ou descrição encontrada para as coordenadas: Latitude: ${lat}, Longitude: ${lon}</p>
+                  <img src="https://http.cat/404" alt="404 Not Found">
+                `);
+            }
+        } catch (error) {
+            console.error(`Erro ao buscar dados de sensação térmica e descrição: ${error}`);
+            return res.status(500).send(`
+              <h1>500 Internal Server Error</h1>
+              <p>Erro ao buscar dados de sensação térmica e descrição</p>
+              <img src="https://http.cat/500" alt="500 Internal Server Error">
+            `);
+        }
+    })
+    .all((req, res) => {
+        res.status(405).send(`
+          <h1>405 Method Not Allowed</h1>
+          <img src="https://http.cat/405" alt="405 Method Not Allowed">
+        `);
+    });
 
 app.use((req, res) => {
     res.status(404).send(`
